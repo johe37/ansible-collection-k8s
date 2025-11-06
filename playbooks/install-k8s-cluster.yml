@@ -1,0 +1,71 @@
+---
+- name: Verify inventory and connectivity
+  hosts: all
+  gather_facts: false
+  tags: check
+  tasks:
+    - name: Ensure ansible_host is set for all hosts
+      ansible.builtin.assert:
+        that:
+          - hostvars[item].ansible_host is defined
+          - hostvars[item].ansible_host | length > 0
+        fail_msg: "❌ Host '{{ item }}' does not have ansible_host defined!"
+        success_msg: "✅ Host '{{ item }}' has ansible_host set to '{{ hostvars[item].ansible_host }}'."
+      run_once: true
+      loop: "{{ groups['k8s_cluster'] }}"
+
+    - name: Ensure required vars are set
+      ansible.builtin.assert:
+        that:
+          - vars[item] is defined
+          - vars[item] | string | length > 0
+        fail_msg: "❌ Required variable '{{ item }}' is not defined or empty."
+        success_msg: "✅ Variable '{{ item }}' is set to '{{ vars[item] }}'."
+      loop:
+        - k8s_master_node
+      run_once: true
+
+    - name: Check SSH connectivity
+      ansible.builtin.ping:
+
+- name: Prepare nodes for Kubernetes
+  hosts: k8s_cluster
+  tags: install
+  tasks:
+    - name: Apply role k8s/prepare
+      ansible.builtin.include_role:
+        name: k8s
+        tasks_from: prepare
+
+    - name: Apply role k8s/install
+      ansible.builtin.include_role:
+        name: k8s
+        tasks_from: install
+
+- name: Initialize cluster
+  hosts: "{{ k8s_master_node }}"
+  tags: cluster
+  tasks:
+    - name: Apply role k8s/cluster
+      ansible.builtin.include_role:
+        name: k8s
+        tasks_from: init-cluster
+
+- name: Join control plane nodes to cluster
+  hosts: k8s_controllers:!{{ k8s_master_node }}
+  tags: controllers
+  tasks:
+    - name: Apply role k8s/join-control-plane
+      ansible.builtin.include_role:
+        name: k8s
+        tasks_from: join-control-plane
+
+- name: Join worker nodes to cluster
+  hosts: k8s_workers
+  tags: workers
+  tasks:
+    - name: Apply role k8s/join-worker
+      ansible.builtin.include_role:
+        name: k8s
+        tasks_from: join-worker
+...

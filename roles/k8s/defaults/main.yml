@@ -1,0 +1,10 @@
+---
+# The k8s version to install
+k8s_version: v1.34
+
+# Pod network
+k8s_pod_network_cidr: 10.244.0.0/16
+
+# The Ansible hostname for the master node
+k8s_master_node: ~
+...

@@ -1,0 +1,39 @@
+# inventory.yml
+k8s_cluster:
+  hosts:
+    k8s-1:
+      ansible_host: ""
+      ansible_user: ""
+      ansible_ssh_private_key_file: ""
+    k8s-2:
+      ansible_host: ""
+      ansible_user: ""
+      ansible_ssh_private_key_file: ""
+    k8s-3:
+      ansible_host: ""
+      ansible_user: ""
+      ansible_ssh_private_key_file: ""
+    k8s-4:
+      ansible_host: ""
+      ansible_user: ""
+      ansible_ssh_private_key_file: ""
+    k8s-5:
+      ansible_host: ""
+      ansible_user: ""
+      ansible_ssh_private_key_file: ""
+  children:
+    k8s_master_node:
+      hosts:
+        k8s-1:
+
+    k8s_controllers:
+      hosts:
+        k8s-1:
+        k8s-2:
+        k8s-3:
+
+    k8s_workers:
+      hosts:
+        k8s-4:
+        k8s-5:
+
