@@ -11,17 +11,17 @@
   changed_when: true
   register: kubeadm_command
 
-- name: Create kube directory
+- name: Create directory for kubeconfig
   ansible.builtin.file:
-    path: /home/{{ ansible_user }}/.kube
+    path: "{{ k8s_master_node_kubeconfig | dirname }}"
     state: directory
     mode: '0755'
 
-- name: Copy kube to the created directory
+- name: Copy the kubeconfig to {{ k8s_master_node_kubeconfig }}
   become: true
   ansible.builtin.copy:
     src: /etc/kubernetes/admin.conf
-    dest: /home/{{ ansible_user }}/.kube/config
+    dest: "{{ k8s_master_node_kubeconfig }}"
     remote_src: true
     mode: '0600'
     owner: "{{ ansible_user }}"

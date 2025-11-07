@@ -7,4 +7,7 @@ k8s_pod_network_cidr: 10.244.0.0/16
 
 # The Ansible hostname for the master node
 k8s_master_node: ~
+
+# The path to the KUBECONFIG on the master node
+k8s_master_node_kubeconfig: /home/{{ ansible_user }}/.kube/config
 ...
