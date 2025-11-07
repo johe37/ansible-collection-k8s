@@ -1,7 +1,4 @@
 ---
-# The name of the k8s cluster
-k8s_cluster_name: k8s-cluster-name
-
 # The k8s version to install
 k8s_version: v1.34
 

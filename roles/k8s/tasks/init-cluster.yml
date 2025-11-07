@@ -8,7 +8,6 @@
       --node-name {{ ansible_hostname }}
       --pod-network-cidr={{ k8s_pod_network_cidr }}
       --upload-certs
-      --cluster-name {{ k8s_cluster_name }}
   changed_when: true
   register: kubeadm_command
 
