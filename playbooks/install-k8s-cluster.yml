@@ -68,4 +68,10 @@
       ansible.builtin.include_role:
         name: k8s
         tasks_from: join-worker
+
+- name: Install Helm
+  hosts: "{{ k8s_master_node }}"
+  tags: helm
+  roles:
+    - helm
 ...

@@ -1,0 +1,14 @@
+---
+galaxy_info:
+  author: johe37
+  description: Install Helm on Debian-based systems
+  license: MIT
+  min_ansible_version: 2.12
+  platforms:
+    - name: Debian
+      versions:
+        - all
+    - name: Ubuntu
+      versions:
+        - all
+

@@ -1,0 +1,44 @@
+---
+- name: Determine Helm vars
+  ansible.builtin.set_fact:
+    _helm_keyring: /etc/apt/keyrings/helm-apt-keyring.gpg
+
+- name: Ensure required packages are installed
+  become: true
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - curl
+    - gpg
+    - apt-transport-https
+
+- name: Download and import Helm GPG key (ASCII format)
+  become: true
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      curl -fsSL https://packages.buildkite.com/helm-linux/helm-debian/gpgkey | gpg --dearmor -o {{ _helm_keyring }}
+    executable: /bin/bash
+  args:
+    creates: "{{ _helm_keyring }}"
+  changed_when: true
+
+- name: Add Helm apt repository
+  become: true
+  ansible.builtin.copy:
+    content: "deb [signed-by={{ _helm_keyring }}] https://packages.buildkite.com/helm-linux/helm-debian/any/ any main"
+    dest: /etc/apt/sources.list.d/helm.list
+    mode: '0644'
+
+- name: Update apt package index with the new repository
+  become: true
+  ansible.builtin.apt:
+    update_cache: true
+
+- name: Install Helm
+  become: true
+  ansible.builtin.package:
+    name: helm
+    state: present
+...

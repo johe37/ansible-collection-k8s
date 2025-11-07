@@ -1,0 +1,4 @@
+- name: Appy task install.yml
+  ansible.builtin.include_tasks:
+    file: install.yml
+
