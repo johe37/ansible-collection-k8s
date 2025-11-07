@@ -1,0 +1,69 @@
+---
+- name: Completely wipe Kubernetes cluster
+  hosts: all
+  become: true
+  gather_facts: false
+  vars_prompt:
+    - name: confirm_wipe
+      prompt: "Are you sure you want to wipe the Kubernetes cluster? Type YES to continue"
+      private: no
+  vars:
+    reset_containerd: true
+  pre_tasks:
+    - name: Fail if user did not confirm
+      ansible.builtin.fail:
+        msg: "Aborting because user did not type YES"
+      when: confirm_wipe != "YES"
+  tasks:
+    - name: Stop kubelet service
+      ansible.builtin.service:
+        name: kubelet
+        state: stopped
+      ignore_errors: true
+
+    - name: Stop containerd if requested
+      ansible.builtin.service:
+        name: containerd
+        state: stopped
+      when: reset_containerd
+      ignore_errors: true
+
+    - name: Reset kubeadm state
+      ansible.builtin.command: kubeadm reset -f
+      ignore_errors: true
+
+    - name: Remove Kubernetes and CNI directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /etc/kubernetes
+        - /var/lib/kubelet
+        - /var/lib/etcd
+        - /var/lib/cni
+        - /etc/cni/net.d
+        - /var/run/kubernetes
+        - /var/lib/dockershim
+        - /root/.kube
+        - /home/{{ ansible_user | default('root') }}/.kube
+      ignore_errors: true
+
+    - name: Remove CNI interfaces and IP tables (non-fatal)
+      ansible.builtin.shell: |
+        ip link delete cni0 || true
+        ip link delete flannel.1 || true
+        ip link delete weave || true
+        ip link delete docker0 || true
+        iptables -F
+        iptables -t nat -F
+        iptables -t mangle -F
+        iptables -X
+      ignore_errors: true
+
+    - name: Start containerd again if requested
+      ansible.builtin.service:
+        name: containerd
+        state: started
+      when: reset_containerd
+      ignore_errors: true
+...
