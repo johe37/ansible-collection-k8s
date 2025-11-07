@@ -29,7 +29,7 @@
         cmd: "{{ kubeadm_command.stdout }}"
       changed_when: true
 
-    - name: Label as worker node
+    - name: Label node with worker
       ansible.builtin.command:
         cmd: kubectl label node {{ ansible_hostname }} node-role.kubernetes.io/worker=true
       changed_when: true
