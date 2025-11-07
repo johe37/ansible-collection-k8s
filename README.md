@@ -13,9 +13,9 @@ Create an ansible inventory under `inventory/cluster.yml`. Inventory sample
 
 ```shell
 # Pre-flight check
-ansible-playbook playbooks/install-k8s-cluster.yml -e @vars/k8s-cluster.yml -i inventory/cluster.yml --tags=check
+ansible-playbook playbooks/install-k8s-cluster.yml --tags=check
 
 # Start the installation:
-ansible-playbook playbooks/install-k8s-cluster.yml -e @vars/k8s-cluster.yml -i inventory/cluster.yml --skip-tags=check
+ansible-playbook playbooks/install-k8s-cluster.yml --skip-tags=check
 ```
 

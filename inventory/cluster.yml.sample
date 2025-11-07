@@ -24,7 +24,7 @@ k8s_cluster:
   children:
     k8s_master_node:
       hosts:
-        k8s-1:
+        k8s-1: # IMPORTANT! ONLY ONE HOST SHOULD BE SET HERE
 
     k8s_controllers:
       hosts:

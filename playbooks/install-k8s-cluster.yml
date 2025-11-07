@@ -4,6 +4,14 @@
   gather_facts: false
   tags: check
   tasks:
+    - name: Ensure that Ansible group k8s_master_node is only set to 1 host
+      ansible.builtin.assert:
+        that:
+          - groups['k8s_master_node'] | length == 1
+        fail_msg: "❌ Ansible group 'k8s_master_node' is not set to 1 host"
+        success_msg: "✅ Ansible group 'k8s_master_node' is only set to 1 host ({{ groups['k8s_master_node'][0] }}"
+      run_once: true
+
     - name: Ensure ansible_host is set for all hosts
       ansible.builtin.assert:
         that:
@@ -43,7 +51,7 @@
         tasks_from: install
 
 - name: Initialize cluster
-  hosts: "{{ k8s_master_node }}"
+  hosts: k8s_master_node
   tags: cluster
   tasks:
     - name: Apply role k8s/cluster
@@ -52,7 +60,7 @@
         tasks_from: init-cluster
 
 - name: Join control plane nodes to cluster
-  hosts: k8s_controllers:!{{ k8s_master_node }}
+  hosts: k8s_controllers:!k8s_master_node
   tags: controllers
   tasks:
     - name: Apply role k8s/join-control-plane
@@ -70,13 +78,13 @@
         tasks_from: join-worker
 
 - name: Install Helm
-  hosts: "{{ k8s_master_node }}"
+  hosts: k8s_master_node
   tags: helm
   roles:
     - helm
 
 - name: Install Flannel
-  hosts: "{{ k8s_master_node }}"
+  hosts: k8s_master_node
   tags: flannel
   tasks:
     - name: Add Helm repo for Flannel
@@ -95,7 +103,7 @@
           podCidr: 10.244.0.0/16
 
 - name: Kubernetes smoke test
-  hosts: "{{ k8s_master_node }}"
+  hosts: k8s_master_node
   gather_facts: false
   tags: test
   tasks:
