@@ -67,4 +67,6 @@ build_ignore: []
 # 'omit_default_directives' is a boolean that controls whether the default directives are used. Mutually exclusive
 # with 'build_ignore'
 # manifest: null
-
+dependencies:
+  ansible.posix: ">=2.1.0"
+  kubernetes.core: ">=6.2.0"
