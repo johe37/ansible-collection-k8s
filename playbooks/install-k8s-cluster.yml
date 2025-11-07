@@ -59,24 +59,6 @@
         name: k8s
         tasks_from: init-cluster
 
-- name: Join control plane nodes to cluster
-  hosts: k8s_controllers:!k8s_master_node
-  tags: controllers
-  tasks:
-    - name: Apply role k8s/join-control-plane
-      ansible.builtin.include_role:
-        name: k8s
-        tasks_from: join-control-plane
-
-- name: Join worker nodes to cluster
-  hosts: k8s_workers
-  tags: workers
-  tasks:
-    - name: Apply role k8s/join-worker
-      ansible.builtin.include_role:
-        name: k8s
-        tasks_from: join-worker
-
 - name: Install Helm
   hosts: k8s_master_node
   tags: helm
@@ -102,10 +84,28 @@
         values:
           podCidr: 10.244.0.0/16
 
+- name: Join control plane nodes to cluster
+  hosts: k8s_controllers:!k8s_master_node
+  tags: controllers
+  tasks:
+    - name: Apply role k8s/join-control-plane
+      ansible.builtin.include_role:
+        name: k8s
+        tasks_from: join-control-plane
+
+- name: Join worker nodes to cluster
+  hosts: k8s_workers
+  tags: workers
+  tasks:
+    - name: Apply role k8s/join-worker
+      ansible.builtin.include_role:
+        name: k8s
+        tasks_from: join-worker
+
 - name: Kubernetes smoke test
   hosts: k8s_master_node
   gather_facts: false
-  tags: test
+  tags: test,smoke
   tasks:
     - name: Check that all nodes are ready
       ansible.builtin.command: kubectl get nodes --no-headers
