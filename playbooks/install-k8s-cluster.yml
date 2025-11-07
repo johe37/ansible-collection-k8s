@@ -93,4 +93,36 @@
         create_namespace: true
         values:
           podCidr: 10.244.0.0/16
+
+- name: Kubernetes smoke test
+  hosts: "{{ k8s_master_node }}"
+  gather_facts: false
+  tags: test
+  tasks:
+    - name: Check that all nodes are ready
+      ansible.builtin.command: kubectl get nodes --no-headers
+      register: nodes
+      retries: 10
+      delay: 3
+      until: "'Ready' in nodes.stdout"
+      changed_when: false
+
+    - name: Deploy test pod
+      ansible.builtin.command:
+        cmd: kubectl run testpod --image=nginx --restart=Never --wait=true
+      changed_when: true
+      ignore_errors: true
+
+    - name: Verify test pod status
+      command: kubectl get pod testpod -o jsonpath='{.status.phase}'
+      register: podstatus
+      retries: 10
+      delay: 3
+      until: podstatus.stdout == 'Running'
+      changed_when: false
+
+    - name: Clean up test pod
+      ansible.builtin.command: kubectl delete pod testpod
+      changed_when: true
+      ignore_errors: true
 ...
